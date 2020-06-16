@@ -7,16 +7,18 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import it.polito.tdp.extflightdelays.model.Airline;
 import it.polito.tdp.extflightdelays.model.Airport;
+import it.polito.tdp.extflightdelays.model.Edge;
 import it.polito.tdp.extflightdelays.model.Flight;
 
 public class ExtFlightDelaysDAO {
 
-	public List<Airline> loadAllAirlines() {
-		String sql = "SELECT * from airlines";
-		List<Airline> result = new ArrayList<Airline>();
+	public List<String> loadAllStates() {
+		String sql = "select distinct state from airports order by state";
+		List<String> result = new ArrayList<String>();
 
 		try {
 			Connection conn = ConnectDB.getConnection();
@@ -24,7 +26,7 @@ public class ExtFlightDelaysDAO {
 			ResultSet rs = st.executeQuery();
 
 			while (rs.next()) {
-				result.add(new Airline(rs.getInt("ID"), rs.getString("IATA_CODE"), rs.getString("AIRLINE")));
+				result.add(rs.getString("state"));
 			}
 
 			conn.close();
@@ -37,9 +39,8 @@ public class ExtFlightDelaysDAO {
 		}
 	}
 
-	public List<Airport> loadAllAirports() {
+	public void loadAllAirports(Map<Integer, Airport> idMap) {
 		String sql = "SELECT * FROM airports";
-		List<Airport> result = new ArrayList<Airport>();
 
 		try {
 			Connection conn = ConnectDB.getConnection();
@@ -47,14 +48,15 @@ public class ExtFlightDelaysDAO {
 			ResultSet rs = st.executeQuery();
 
 			while (rs.next()) {
-				Airport airport = new Airport(rs.getInt("ID"), rs.getString("IATA_CODE"), rs.getString("AIRPORT"),
+				if(!idMap.containsKey(rs.getInt("ID"))) {
+					Airport airport = new Airport(rs.getInt("ID"), rs.getString("IATA_CODE"), rs.getString("AIRPORT"),
 						rs.getString("CITY"), rs.getString("STATE"), rs.getString("COUNTRY"), rs.getDouble("LATITUDE"),
 						rs.getDouble("LONGITUDE"), rs.getDouble("TIMEZONE_OFFSET"));
-				result.add(airport);
+					idMap.put(airport.getId(), airport);
+				}
 			}
 
 			conn.close();
-			return result;
 
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -63,9 +65,11 @@ public class ExtFlightDelaysDAO {
 		}
 	}
 
-	public List<Flight> loadAllFlights() {
-		String sql = "SELECT * FROM flights";
-		List<Flight> result = new LinkedList<Flight>();
+	public List<Edge> loadAllFlights() {
+		String sql = "select distinct a1.state as s1, a2.state as s2, count(distinct tail_number) as peso from airports as a1, airports as a2, flights " + 
+				"where a1.id = origin_airport_id and a2.id = destination_airport_id " + 
+				"group by a1.state, a2.state";
+		List<Edge> result = new LinkedList<Edge>();
 
 		try {
 			Connection conn = ConnectDB.getConnection();
@@ -73,13 +77,8 @@ public class ExtFlightDelaysDAO {
 			ResultSet rs = st.executeQuery();
 
 			while (rs.next()) {
-				Flight flight = new Flight(rs.getInt("ID"), rs.getInt("AIRLINE_ID"), rs.getInt("FLIGHT_NUMBER"),
-						rs.getString("TAIL_NUMBER"), rs.getInt("ORIGIN_AIRPORT_ID"),
-						rs.getInt("DESTINATION_AIRPORT_ID"),
-						rs.getTimestamp("SCHEDULED_DEPARTURE_DATE").toLocalDateTime(), rs.getDouble("DEPARTURE_DELAY"),
-						rs.getDouble("ELAPSED_TIME"), rs.getInt("DISTANCE"),
-						rs.getTimestamp("ARRIVAL_DATE").toLocalDateTime(), rs.getDouble("ARRIVAL_DELAY"));
-				result.add(flight);
+				Edge e = new Edge(rs.getString("s1"), rs.getString("s2"), rs.getInt("peso"));
+				result.add(e);
 			}
 
 			conn.close();
