@@ -1,4 +1,4 @@
-package it.polito.tdp.extflightdelays.db;
+package it.polito.tdp.newufosightings.db;
 
 import java.sql.Connection;
 

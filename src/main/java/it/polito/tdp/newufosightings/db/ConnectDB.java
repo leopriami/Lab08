@@ -1,4 +1,4 @@
-package it.polito.tdp.extflightdelays.db;
+package it.polito.tdp.newufosightings.db;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -8,7 +8,7 @@ import com.zaxxer.hikari.HikariDataSource;
 
 public class ConnectDB {
 
-	private static final String jdbcURL = "jdbc:mysql://localhost/extflightdelays";
+	private static final String jdbcURL = "jdbc:mysql://localhost/new_ufo_sightings";
 	private static HikariDataSource ds;
 	
 	public static Connection getConnection() {
@@ -17,7 +17,7 @@ public class ConnectDB {
 			HikariConfig config = new HikariConfig();
 			config.setJdbcUrl(jdbcURL);
 			config.setUsername("root");
-			config.setPassword("quel0p0rc0");
+			config.setPassword("");
 			
 			// configurazione MySQL
 			config.addDataSourceProperty("cachePrepStmts", "true");
