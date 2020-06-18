@@ -6,7 +6,7 @@ import java.sql.SQLException;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
-public class ConnectDB {
+public class DBConnect {
 
 	private static final String jdbcURL = "jdbc:mysql://localhost/new_ufo_sightings";
 	private static HikariDataSource ds;
@@ -17,7 +17,7 @@ public class ConnectDB {
 			HikariConfig config = new HikariConfig();
 			config.setJdbcUrl(jdbcURL);
 			config.setUsername("root");
-			config.setPassword("");
+			config.setPassword("quel0p0rc0");
 			
 			// configurazione MySQL
 			config.addDataSourceProperty("cachePrepStmts", "true");
@@ -36,5 +36,4 @@ public class ConnectDB {
 			throw new RuntimeException(e);
 		}
 	}
-
 }
